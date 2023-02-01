@@ -2,6 +2,7 @@ import { Events, GatewayIntentBits, Partials } from "discord.js";
 import { connect, set } from "mongoose";
 import Bot from "./structs/Bot";
 import { getApp } from "./lib/Api";
+import BotCrons from "./lib/BotCrons";
 
 class Main {
     private client: Bot;
@@ -41,6 +42,7 @@ class Main {
             if (this.client.shard?.ids[0] === (this.client.shard?.count ?? 1) - 1) {
                 if (process.env.NODE_ENV === "production") {
                     getApp(this.client);
+                    new BotCrons(this.client);
                 }
             }
         });
