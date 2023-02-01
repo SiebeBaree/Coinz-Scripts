@@ -33,6 +33,28 @@ export const processVote = async (bot: Bot, userId: string, website = "top.gg") 
             extraText = "\nYou have received **2x** spins for voting on a weekend while having a premium membership!";
         }
 
+
+        const voteWebsite = member.voteTimestamps.find((voteTimestamp) => voteTimestamp.website.toLowerCase() === data.name.toLowerCase());
+        if (!voteWebsite) {
+            await Member.updateOne(
+                { id: userId },
+                { $push: { voteTimestamps: { website: data.name, lastVoted: Math.floor(Date.now() / 1000), sendReminder: false, timesVoted: 1 } } },
+            );
+        } else {
+            await Member.updateOne(
+                { id: userId, "voteTimestamps.website": data.name },
+                {
+                    $inc: {
+                        "voteTimestamps.$.timesVoted": 1,
+                    },
+                    $set: {
+                        "voteTimestamps.$.lastVoted": Math.floor(Date.now() / 1000),
+                        "voteTimestamps.$.sendReminder": false,
+                    },
+                },
+            );
+        }
+
         if (member.notifications.includes("vote")) {
             const user = await bot.users.fetch(userId);
 
