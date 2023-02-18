@@ -1,6 +1,7 @@
 import { ColorResolvable, EmbedBuilder } from "discord.js";
 import { schedule } from "node-cron";
 import Member, { IMember } from "../database/models/Member";
+import Premium, { IPremium } from "../database/models/Premium";
 import Bot from "../structs/Bot";
 
 export default class BotCrons {
@@ -75,6 +76,28 @@ export default class BotCrons {
                 }
             } catch (e) {
                 this.bot.logger.error(e);
+            }
+        });
+
+        // make a cron that runs every minute
+        schedule("* * * * *", async () => {
+            const premiumMembers = await Premium.find({ userTier: { $gt: 0 } }) as IPremium[];
+
+            for (const premiumMember of premiumMembers) {
+                const member = await Member.findOne({ id: premiumMember.id }) as IMember;
+                if (!member || member.premium.active) continue;
+
+                this.bot.logger.info(`[Premium] Activated premium for ${premiumMember.id} (Tier: ${premiumMember.userTier})`);
+                await Member.updateOne(
+                    { id: premiumMember.id },
+                    {
+                        $set: {
+                            "premium.active": true,
+                            "premium.tier": premiumMember.userTier,
+                            "premium.expires": premiumMember.userExpires,
+                        },
+                    },
+                );
             }
         });
     }
