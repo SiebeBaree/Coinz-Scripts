@@ -8,8 +8,6 @@ COPY dist ./dist
 
 # For production
 # ENV NODE_ENV=production
-ENV PORT=7301
-EXPOSE 7301
 
 RUN npm ci --emit=dev
 
