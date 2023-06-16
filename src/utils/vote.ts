@@ -24,16 +24,6 @@ export const processVote = async (bot: Bot, userId: string, website = "top.gg") 
         const data = website === "top.gg" ? topgg : dbl;
         const member = await Database.getMember(userId, true);
 
-        let extraSpins = 1;
-        let extraText = "";
-
-        const now = new Date();
-        if (member.premium.active && member.premium.tier === 2 && [0, 6].includes(now.getDay())) {
-            extraSpins = 2;
-            extraText = "\nYou have received **2x** spins for voting on a weekend while having a premium membership!";
-        }
-
-
         const voteWebsite = member.voteTimestamps.find((voteTimestamp) => voteTimestamp.website.toLowerCase() === data.name.toLowerCase());
         if (!voteWebsite) {
             await Member.updateOne(
@@ -61,11 +51,11 @@ export const processVote = async (bot: Bot, userId: string, website = "top.gg") 
             const embed = new EmbedBuilder()
                 .setAuthor({ name: "Thank you for voting!", iconURL: `https://cdn.discordapp.com/emojis/${data.id}.png` })
                 .setColor(<ColorResolvable>bot.config.embed.color)
-                .setDescription(`Thank you for voting on <:${data.name}:${data.id}> [**${data.website}**](${data.vote})${extraText}`)
+                .setDescription(`Thank you for voting on <:${data.name}:${data.id}> [**${data.website}**](${data.vote})`)
                 .addFields(
                     {
                         name: "Statistics",
-                        value: `:calendar: **Total Votes:** ${member.votes + 1}x\n:moneybag: **Wheel spins left:** ${member.spins + extraSpins}x`,
+                        value: `:calendar: **Total Votes:** ${member.votes + 1}x\n:moneybag: **Wheel spins left:** ${member.spins}x`,
                         inline: false,
                     },
                 )
@@ -87,7 +77,7 @@ export const processVote = async (bot: Bot, userId: string, website = "top.gg") 
 
         await Member.updateOne(
             { id: userId },
-            { $inc: { votes: 1, spins: extraSpins } },
+            { $inc: { votes: 1, spins: 1 } },
         );
     } catch (error) {
         bot.logger.error(error);
