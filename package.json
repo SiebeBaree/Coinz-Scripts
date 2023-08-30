@@ -52,7 +52,7 @@
     "fs": "^0.0.1-security",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.40",
-    "mongoose": "^6.11.2",
+    "mongoose": "^6.12.0",
     "node-cron": "^3.0.2",
     "winston": "^3.9.0",
     "winston-daily-rotate-file": "^4.7.1"
